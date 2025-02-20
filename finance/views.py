@@ -51,6 +51,16 @@ def logout_user(request):
 def current_finance(request):
    return render(request, 'finance/current_finance.html') 
 
+def add_transaction(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = TransactionForm()
+        return render(request, 'finance/home.html', {'form': form})
+
 
     
 
