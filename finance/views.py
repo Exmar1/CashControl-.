@@ -4,11 +4,13 @@ from finance.models import CustomUser as User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from .forms import TransactionForm
+from django.contrib import messages
 
 # Create your views here.
 
 def home(request):
-     return render(request, 'finance/home.html')
+     form = TransactionForm()
+     return render(request, 'finance/home.html', {'form': form})
 
 def signup_user(request):
     if request.method == 'GET':
@@ -48,10 +50,19 @@ def add_transaction(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('home')
-    # Просто редирект, т.к. форма отправляется через AJAX
-    return redirect('home')
+            if request.user.is_authenticated:
+                transaction = form.save(commit=False)
+                transaction.user = request.user
+                transaction.save()  
+            else:
+                form.save()
+                messages.success(request, 'Транзакция успешно сохранена')
+                return redirect('home')
+        else:
+            messages.error(request, 'Ошибка при сохранении транзакции. Проверьте введенные данные.')
+            return render(request, 'finance/home.html', {'form': form})
+        return redirect('home')
+    
 
 
 

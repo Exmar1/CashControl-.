@@ -1,21 +1,28 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Главная - Управление финансами{% endblock %}
+
+{% block header %} Главная Страница по управлению финансами {% endblock header %}  
+
 
 {% block content %}
+<div class="transactions-section">
+	<button id="add-transaction-btn">Добавить транзакцию</button>
 
-<h1>Главная Страница по управлению финансами</h1>
-
-<button id="add-transaction-btn">Добавить Транзакцию</button>
-<div id="transaction-form-container" style="display: none;">
-	<form method='POST' action="{% url 'add_transaction' %}">
-		{% csrf_token %}
-		{{ form.as_p }} 
-		<button type="submit">Сохранить Транзакцию</button>
-	</form>
+	<div id="transaction-form-container" style="display: none;">
+		<form method='POST' action="{% url 'add_transaction' %}">
+			{% csrf_token %}
+			{{ form.as_p }} 
+			<button type="submit">Сохранить транзакцию</button>
+		</form>
+	</div>
 </div>
-	
+{% endblock content %}
+
+{% block scripts %}
 <script>
 	document.getElementById("add-transaction-btn").addEventListener("click", function() {
-		document.getElementById("transaction-form-container").style.display = "block";
+			document.getElementById("transaction-form-container").style.display = "block";
 	});
 </script>
-	
-{% endblock %}
+{% endblock scripts %}

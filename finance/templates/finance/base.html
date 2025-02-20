@@ -1,29 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Управление финансами{% endblock %}</title>
 </head>
 <body>
-	{% if user.is_authenticated %}
-	
-	Logged In as {{ user.username }} 
+    <div class="container">
+        <div class="header">
+            <h1>{% block header %}Управление финансами{% endblock %}</h1>
+            <div class="auth-links">
+                {% if user.is_authenticated %}
+                <span>Вы вошли как: {{ user.username }} </span>
+                <form action="{% url 'logoutuser' %}" method='POST' style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">Выйти</button>
+                </form>
+                {% else %}
+                <a href="{% url 'signupuser' %}">Регистрация</a>
+                <a href="{% url 'loginuser' %}">Вход</a>
+                {% endif %}
+            </div>
+        </div>
 
-	<form action="{% url 'logoutuser' %}" method='POST'>
-		{% csrf_token %}
-		{{ form.as_p }}
-		<button type="submit">Logout</button>
-	</form>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-	{% else %}
- 
-	<a href="{% url 'signupuser' %}">Sign Up</a>
-	<a href="{% url 'loginuser' %}">Login</a>
+        <main>
+            {% block content %}
+            <!-- Содержимое основной страницы будет здесь -->
+            {% endblock %}
+        </main>
+    </div>
 
-	{% endif %}
-{% block content %}
-
-{% endblock  %}
+    {% block scripts %}
+    <!-- Скрипты будут подключаться здесь -->
+    {% endblock %}
 </body>
 </html>
