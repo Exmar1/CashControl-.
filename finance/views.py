@@ -8,14 +8,7 @@ from .forms import TransactionForm
 # Create your views here.
 
 def home(request):
-    if request.method == 'POST':
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = TransactionForm()
-        return render(request, 'finance/home.html', {'form': form})
+     return render(request, 'finance/home.html')
 
 def signup_user(request):
     if request.method == 'GET':
@@ -57,12 +50,8 @@ def add_transaction(request):
         if form.is_valid():
             form.save()
             return redirect('home')
-    else:
-        form = TransactionForm()
-        return render(request, 'finance/home.html', {'form': form})
-
-
-    
+    # Просто редирект, т.к. форма отправляется через AJAX
+    return redirect('home')
 
 
 

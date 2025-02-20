@@ -5,7 +5,7 @@
 
 <button id="add-transaction-btn">Добавить Транзакцию</button>
 <div id="transaction-form-container" style="display: none;">
-	<form method='POST'>
+	<form method='POST' action="{% url 'add_transaction' %}">
 		{% csrf_token %}
 		{{ form.as_p }} 
 		<button type="submit">Сохранить Транзакцию</button>

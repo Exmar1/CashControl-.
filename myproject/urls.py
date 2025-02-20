@@ -27,12 +27,8 @@ urlpatterns = [
 	path('logout/', views.logout_user, name='logoutuser'),
 	
     #Finance
-<<<<<<< HEAD
-	path('', views.home, name='home'),		
-=======
 	path('', views.home, name='home'),	
-	path('add-transaction', views.add_transaction, name='add_transaction'),		
->>>>>>> 8c4f7ee48b96989f4f15c8815fe6f6ed98bdccd1
+	path('add-transaction/', views.add_transaction, name='add_transaction'),	
 	path('current/', views.current_finance, name='current_finance'),
 ]
  
