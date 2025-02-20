@@ -17,10 +17,19 @@ class Transaction(models.Model):
 		('expense', 'Расход'),
 	)
 
+	CATEGORY_CHOICES = (
+		('cars', 'Автомобиль'),
+		('food', 'Продукты'),
+		('rent', 'Аренда'),
+		('salary', 'Зарплата'),
+		('entertainment', 'Развлечения'),
+
+)
+
 	user = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
-	category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True)
 	amount = models.DecimalField(max_digits=10, decimal_places=2)
 	transaction_type = models.CharField(max_length=9, choices=TRANSACTION_TYPE)
+	category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
 	date = models.DateTimeField(null=True, blank=True)
 	description = models.TextField(blank=True)
 
