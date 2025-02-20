@@ -4,7 +4,6 @@
 
 {% block header %} Главная Страница по управлению финансами {% endblock header %}  
 
-
 {% block content %}
 <div class="transactions-section">
 	<button id="add-transaction-btn">Добавить транзакцию</button>
@@ -17,6 +16,9 @@
 		</form>
 	</div>
 </div>
+
+<a href="{% url 'completed_finance' %}">Мои транзакции</a>
+
 {% endblock content %}
 
 {% block scripts %}
@@ -26,3 +28,4 @@
 	});
 </script>
 {% endblock scripts %}
+

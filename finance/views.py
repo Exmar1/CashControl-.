@@ -5,9 +5,10 @@ from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from .forms import TransactionForm
 from django.contrib import messages
+from .models import Transaction
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
-
+@login_required
 def home(request):
      form = TransactionForm()
      return render(request, 'finance/home.html', {'form': form})
@@ -43,25 +44,25 @@ def logout_user(request):
         logout(request)
         return redirect('home')
 
-def current_finance(request):
-   return render(request, 'finance/current_finance.html') 
+@login_required
+def completed_finance(request):
+    transactions = Transaction.objects.filter(user=request.user, date__isnull=False).order_by('-date')
+    return render(request, 'finance/transactions_list.html', {'transactions': transactions})
 
+@login_required
 def add_transaction(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
-            if request.user.is_authenticated:
-                transaction = form.save(commit=False)
-                transaction.user = request.user
-                transaction.save()  
-            else:
-                form.save()
-                messages.success(request, 'Транзакция успешно сохранена')
-                return redirect('home')
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.save()
+            messages.success(request, 'Транзакция успешно сохранена')
+            return redirect('home') 
         else:
             messages.error(request, 'Ошибка при сохранении транзакции. Проверьте введенные данные.')
             return render(request, 'finance/home.html', {'form': form})
-        return redirect('home')
+    return redirect('home')
     
 
 
