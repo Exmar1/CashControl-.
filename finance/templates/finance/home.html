@@ -2,6 +2,21 @@
 
 {% block content %}
 
-<h1>Home</h1
+<h1>Главная Страница по управлению финансами</h1>
 
+<button id="add-transaction-btn">Добавить Транзакцию</button>
+<div id="transaction-form-container" style="display: none;">
+	<form method='POST'>
+		{% csrf_token %}
+		{{ form.as_p }} 
+		<button type="submit">Сохранить Транзакцию</button>
+	</form>
+</div>
+	
+<script>
+	document.getElementById("add-transaction-btn").addEventListener("click", function() {
+		document.getElementById("transaction-form-container").style.display = "block";
+	});
+</script>
+	
 {% endblock %}

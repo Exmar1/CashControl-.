@@ -28,6 +28,7 @@ urlpatterns = [
 	
     #Finance
 	path('', views.home, name='home'),	
+	path('add-transaction', views.add_transaction, name='add_transaction'),		
 	path('current/', views.current_finance, name='current_finance'),
 ]
  
