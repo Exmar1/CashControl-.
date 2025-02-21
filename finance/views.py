@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from finance.models import CustomUser as User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
-from .forms import TransactionForm
+from .forms import TransactionForm, BudgetForm
 from django.contrib import messages
 from .models import Transaction
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,9 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def home(request):
      form = TransactionForm()
-     return render(request, 'finance/home.html', {'form': form})
+     budget_form = BudgetForm()
+     return render(request, 'finance/home.html', {'form': form, 'budget_form': budget_form})
+
 
 def signup_user(request):
     if request.method == 'GET':
@@ -61,8 +63,31 @@ def add_transaction(request):
             return redirect('home') 
         else:
             messages.error(request, 'Ошибка при сохранении транзакции. Проверьте введенные данные.')
-            return render(request, 'finance/home.html', {'form': form})
-    return redirect('home')
+            form = BudgetForm()
+
+        return render(request, 'finance/home.html', {'form':form})
+    
+
+@login_required
+def add_budget(request):
+    form = TransactionForm()
+    if request.method == 'POST':
+        budget_form = BudgetForm(request.POST)
+        if  budget_form.is_valid():
+            budget =  budget_form.save(commit=False)
+            budget.user = request.user
+            budget.save()
+            messages.success(request, 'Бюджет сохранен')
+            return redirect('home')
+        else:
+            messages.error(request, 'Ошибка при сохранение бюджета, проверьте введенные данные')
+    else:
+        budget_form = BudgetForm()
+
+    return render(request, 'finance/home.html', {'form': form, 'budget_form': budget_form})
+
+    
+
     
 
 

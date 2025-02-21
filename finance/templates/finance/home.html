@@ -17,14 +17,31 @@
 	</div>
 </div>
 
-<a href="{% url 'completed_finance' %}">Мои транзакции</a>
+<button id="add-budget-btn">Добавить Бюджет</button>
 
+<div id="budget-form-container" style="display: none;">
+	<form method='POST' action="{% url 'add_budget' %}">
+		{% csrf_token %}
+		{{ budget_form.as_p }}
+		<button type="submit">Сохранить бюджет</button>
+		</form>
+</div>
+
+
+<a href="{% url 'completed_finance' %}">Мои транзакции</a>
 {% endblock content %}
+
 
 {% block scripts %}
 <script>
 	document.getElementById("add-transaction-btn").addEventListener("click", function() {
-			document.getElementById("transaction-form-container").style.display = "block";
+		document.getElementById("transaction-form-container").style.display = "block";
+	});
+</script>
+
+<script>
+	document.getElementById("add-budget-btn").addEventListener("click", function() {
+			document.getElementById("budget-form-container").style.display = "block";
 	});
 </script>
 {% endblock scripts %}
