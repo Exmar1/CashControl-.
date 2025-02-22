@@ -32,5 +32,7 @@ urlpatterns = [
 	path('completed/', views.completed_finance, name='completed_finance' ),
 	path('add-budget/', views.add_budget, name='add_budget'),
 	path('delete_transaction/<int:finance_pk>/', views.delete_transaction, name='delete_transaction'),
+	path('transactions/', views.all_transactions, name='all_transactions'),
+
 ]
  

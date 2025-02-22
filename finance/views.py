@@ -33,8 +33,6 @@ def home(request):
         "budget": budget
     })
 
-
-
 def signup_user(request):
     if request.method == 'GET':
         return render(request, 'finance/signupuser.html', {'form':UserCreationForm()})
@@ -87,6 +85,19 @@ def add_transaction(request):
 
         return render(request, 'finance/home.html', {'form':form})
     
+@login_required
+def all_transactions(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+    search_query = request.GET.get('search_query', '' )
+
+    if search_query:
+        transactions = transactions.filter(description__icontains=search_query)
+
+    return render(request, 'finance/transactions_list.html', {
+        'transactions': transactions,
+        'search_query': search_query 
+    })
+
 @login_required
 def delete_transaction(request, finance_pk):
     transaction = get_object_or_404(Transaction, id=finance_pk, user=request.user)

@@ -2,6 +2,12 @@
 {% block content %}
 <h1>Мои транзакции</h1>
 
+
+<form method="GET" action="{% url 'all_transactions' %}">
+	<input type="text" name="search_query" placeholder="Введите ключевые слова..." value="{{ search_query }}">
+	<button type="submit">Поиск</button>
+</form>
+
 {% if  transactions %}
 <table border="1">
 	<thead>
@@ -35,5 +41,5 @@
 			<p>Транзакций пока нет</p>
 {% endif %}
 
-<a href="{% url 'home' %}">Вернуться на главную</a>
+<a href="{% url 'home' %}">Вернуться на главную</a>	
 {% endblock  %}
