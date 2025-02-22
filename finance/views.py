@@ -5,14 +5,34 @@ from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from .forms import TransactionForm, BudgetForm
 from django.contrib import messages
-from .models import Transaction
+from .models import Transaction, Budget
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 
 @login_required
 def home(request):
-     form = TransactionForm()
-     budget_form = BudgetForm()
-     return render(request, 'finance/home.html', {'form': form, 'budget_form': budget_form})
+     if request.method == 'POST' and 'save_budget' in request.POST:
+         budget = Budget.objects.filter(user=request.user).first()
+         budget_form = BudgetForm(request.POST, instance=budget)
+         if budget_form.is_valid():
+             new_budget = budget_form.save(commit=False)
+             new_budget.user = request.user
+             new_budget.save()
+             return redirect('home')
+     else:
+         form = TransactionForm()
+         budget = Budget.objects.filter(user=request.user).first()
+         budget_form = BudgetForm(instance=budget)
+
+     transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+
+     return render(request, 'finance/home.html', {
+        "form": form,
+        "budget_form": budget_form,
+        "transaction": transactions,
+        "budget": budget
+    })
+
 
 
 def signup_user(request):
@@ -67,29 +87,43 @@ def add_transaction(request):
 
         return render(request, 'finance/home.html', {'form':form})
     
+@login_required
+def delete_transaction(request, finance_pk):
+    transaction = get_object_or_404(Transaction, id=finance_pk, user=request.user)
+    if request.method == 'POST':
+        transaction.delete()
+        return redirect('completed_finance')
+
 
 @login_required
 def add_budget(request):
     form = TransactionForm()
+    budgets = Budget.objects.filter(user=request.user).order_by('-date')
     if request.method == 'POST':
-        budget_form = BudgetForm(request.POST)
-        if  budget_form.is_valid():
-            budget =  budget_form.save(commit=False)
-            budget.user = request.user
-            budget.save()
-            messages.success(request, 'Бюджет сохранен')
-            return redirect('home')
-        else:
-            messages.error(request, 'Ошибка при сохранение бюджета, проверьте введенные данные')
-    else:
-        budget_form = BudgetForm()
+        if "save_transaction" in request.POST:
+            form = TransactionForm(request.POST)
+            if form.is_valid():
+                transaction = form.save(commit=False)
+                transaction.user = request.user
+                transaction.save()
+                return redirect("home")
+            
+        elif "save_budget" in request.POST:
+            budget_form = BudgetForm(request.POST, instance=budgets)
+            if budget_form.is_valid():
+                new_budget = budget_form.save(commit=False)
+                new_budget.user = request.user
+                new_budget.save()
+                return redirect('home')
+            
+    return render(request, 'finance/home.html', {
+        "form":form,
+        "budget_form":budget_form,
+        "transaction": transaction,
+        "budgets":budgets
+    })
 
-    return render(request, 'finance/home.html', {'form': form, 'budget_form': budget_form})
 
-    
+      
 
-    
-
-
-
-        
+                    

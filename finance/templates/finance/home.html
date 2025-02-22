@@ -1,48 +1,78 @@
 {% extends "finance/base.html" %}
 
-{% block title %}Главная - Управление финансами{% endblock %}
+{% block title %}
+    Главная - Управление финансами
+		<br>
+		Ваш Бюджет
+{% endblock %}
 
-{% block header %} Главная Страница по управлению финансами {% endblock header %}  
+{% block header %}
+    Главная Страница по управлению финансами
+{% endblock header %}  
 
 {% block content %}
-<div class="transactions-section">
-	<button id="add-transaction-btn">Добавить транзакцию</button>
+<h2>Финансовое управление</h2>
 
-	<div id="transaction-form-container" style="display: none;">
-		<form method='POST' action="{% url 'add_transaction' %}">
-			{% csrf_token %}
-			{{ form.as_p }} 
-			<button type="submit">Сохранить транзакцию</button>
-		</form>
-	</div>
-</div>
+    <!-- Секция транзакций -->
+    <div class="transactions-section">
+        <button id="add-transaction-btn">
+            Добавить транзакцию
+        </button>
+        <div id="transaction-form-container" style="display: none;">
+            <form method="POST" action="{% url 'add_transaction' %}">
+                {% csrf_token %}
+                {{ form.as_p }} 
+                <button type="submit">
+                    Сохранить транзакцию
+                </button>
+            </form>
+        </div>
+    </div>
 
-<button id="add-budget-btn">Добавить Бюджет</button>
+    <!-- Секция бюджета -->
+    <div class = "budget-section">
+			<h3>Ваш Бюджет</h3>
+			{% if budget %}
+					<p>Текущий бюджет: <strong>{{ budget.amount }}  ₽</strong> (Категория: {{ budget.category }})</p>
+			{% else %}
+					<p>Бюджет пока не задан</p>
+			{% endif %}
 
-<div id="budget-form-container" style="display: none;">
-	<form method='POST' action="{% url 'add_budget' %}">
-		{% csrf_token %}
-		{{ budget_form.as_p }}
-		<button type="submit">Сохранить бюджет</button>
-		</form>
-</div>
+			<form method='POST', action="{% url 'home' %}">
+				{% csrf_token %}
+				{{ budget_form.as_p }}
+				<button type="submit" name="save_budget">
+					{% if budget  %}Изменить{% else %}Добавить{% endif %}бюджет
+				</button>
+			</form>
+		</div>
 
+		<!-- Список транзакций -->
+    <h3>Последние транзакции</h3>
+		<ul>
+				{% for transactions in transaction  %}
+					<li>{{ transactions.date }}: {{ transactions.amount }} ₽ - {{ transactions.category }}</li>
+				{% empty %}
+				<li>Нет транзакций</li>
+				{% endfor %}
+		</ul>
 
 <a href="{% url 'completed_finance' %}">Мои транзакции</a>
+
 {% endblock content %}
 
-
 {% block scripts %}
-<script>
-	document.getElementById("add-transaction-btn").addEventListener("click", function() {
-		document.getElementById("transaction-form-container").style.display = "block";
-	});
-</script>
+    <!-- Скрипт для отображения формы транзакций -->
+    <script>
+        document.getElementById("add-transaction-btn").addEventListener("click", function() {
+            document.getElementById("transaction-form-container").style.display = "block";
+        });
+    </script>
 
-<script>
-	document.getElementById("add-budget-btn").addEventListener("click", function() {
-			document.getElementById("budget-form-container").style.display = "block";
-	});
-</script>
+    <!-- Скрипт для отображения формы бюджета -->
+    <script>
+        document.getElementById("add-budget-btn").addEventListener("click", function() {
+            document.getElementById("budget-form-container").style.display = "block";
+        });
+    </script>
 {% endblock scripts %}
-
