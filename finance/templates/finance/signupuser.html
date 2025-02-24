@@ -1,16 +1,52 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Регистрация | ФинМенеджер{% endblock %}
 
 {% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Создание аккаунта</h1>
+            <p class="auth-subtitle">Начните контролировать свои финансы уже сегодня!</p>
+        </div>
 
+        {% if error %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
 
-<h1>Sign Up</h1>
-
-<h2>{{ error }}</h2>
-
-<form method="POST" > 
-	{% csrf_token %}
-{{ form.as_p }}
-<button type="submit">Sign Up</button>
-</form>
-
+        <form method="POST" action="{% url 'signupuser' %}" class="auth-form"> 
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Имя пользователя</label>
+                <input type="text" name="username" id="id_username" required>
+                {% if form.username.errors %}
+                <span class="field-error">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_password1">Пароль</label>
+                <input type="password" name="password1" id="id_password1" required>
+                {% if form.password1.errors %}
+                <span class="field-error">{{ form.password1.errors.0 }}</span>
+                {% endif %}
+                <small class="help-text">Минимум 8 символов, включая буквы и цифры.</small>
+            </div>
+            <div class="form-group">
+                <label for="id_password2">Подтверждение пароля</label>
+                <input type="password" name="password2" id="id_password2" required>
+                {% if form.password2.errors %}
+                <span class="field-error">{{ form.password2.errors.0 }}</span>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn-submit">Зарегистрироваться</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Уже есть аккаунт? <a href="{% url 'loginuser' %}">Войдите</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}
-

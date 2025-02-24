@@ -1,19 +1,38 @@
 {% extends "finance/base.html" %}
 
+{% block title %}Вход | ФинМенеджер{% endblock %}
+
 {% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Вход в систему</h1>
+            <p class="auth-subtitle">Добро пожаловать обратно! Пожалуйста, войдите в ваш аккаунт.</p>
+        </div>
 
+        {% if error %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
 
-<h1>Login</h1>
-
-<h2>{{ error }}</h2>
-
-<form method="POST" > 
-	{% csrf_token %}
-{{ form.as_p }}
-<button type="submit">Login</button>
-</form>
-
+        <form method="POST" action="{% url 'loginuser' %}" class="auth-form"> 
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Имя пользователя</label>
+                <input type="text" name="username" id="id_username" required>
+            </div>
+            <div class="form-group">
+                <label for="id_password">Пароль</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+            <button type="submit" class="btn-submit">Войти</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Ещё нет аккаунта? <a href="{% url 'signupuser' %}">Зарегистрируйтесь</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-
-

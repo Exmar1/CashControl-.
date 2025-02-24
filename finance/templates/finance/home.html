@@ -38,14 +38,20 @@
 					<p>Бюджет пока не задан</p>
 			{% endif %}
 
-			<form method='POST', action="{% url 'home' %}">
-				{% csrf_token %}
-				{{ budget_form.as_p }}
-				<button type="submit" name="save_budget">
-					{% if budget  %}Изменить{% else %}Добавить{% endif %}бюджет
-				</button>
-			</form>
-		</div>
+            <button id="toggle-budget-form">
+                {% if budget  %}Изменить{% else %}Добавить{% endif %} бюджет
+            </button>
+
+            <div id="budget-form-container" style='display: none;'>
+                <form method='POST' action="{% url 'home' %}">
+                    {% csrf_token %}
+                    {{ budget_form.as_p }}
+                    <button type="submit" name="save_budget">
+                        Сохранить
+                    </button>
+                </form>
+            </div>
+        </div>
 
 		<!-- Список транзакций -->
     <h3>Последние транзакции</h3>
@@ -73,6 +79,17 @@
     <script>
         document.getElementById("add-budget-btn").addEventListener("click", function() {
             document.getElementById("budget-form-container").style.display = "block";
+        });
+    </script>
+
+    <script>
+        document.getElementById("toggle-budget-form").addEventListener("click", function() {
+            var formContainer = document.getElementById("budget-form-container");
+            if (formContainer.style.display === "none") {
+                formContainer.style.display = "block";
+            } else {
+                formContainer.style.display = "none";
+            }
         });
     </script>
 {% endblock scripts %}

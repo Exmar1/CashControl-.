@@ -8,6 +8,43 @@
 	<button type="submit">Поиск</button>
 </form>
 
+<form method='GET' action="{% url 'all_transactions' %}">
+	<label for="category">Категории</label>
+	<select name='category'>
+			<option value="">Все категории</option>
+			{% for value, label in category_choices %}
+			<option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
+					{{ label }}
+			</option>
+			{% endfor %}
+	</select>    
+
+	<label for="transaction_type">Тип Транзакции</label>
+	<select name="transaction_type">
+			<option value="">Все</option>
+			{% for value, label in transaction_type_choices %}
+			<option value="{{ value }}" {% if request.GET.transaction_type == value %}selected{% endif %}>
+					{{ label }}
+			</option>
+			{% endfor %}
+	</select>
+	
+	<label for="start_date">Дата (от):</label>
+	<input type="date" name="start_date" value="{{ request.GET.start_date }}">
+
+	<label for='end_date'>Дата (до):</label>
+	<input type="date" name = "end_date" value="{{ request.GET.end_date }}">
+
+	<label for='min_amount'>Сумма (от):</label>
+	<input type='number' name='min_amount' step='0.01' value='{{ request.GET.min_amount }}'>
+	
+	<label for='max_amount'>Сумма (до):</label>
+	<input type='number' name='max_amount' step='0.01' value='{{ request.GET.max_amount }}'>
+		
+	<button type='submit'>Фильтровать</button>
+</form>	
+	
+
 {% if  transactions %}
 <table border="1">
 	<thead>

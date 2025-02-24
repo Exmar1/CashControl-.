@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from .forms import TransactionForm, BudgetForm
 from django.contrib import messages
-from .models import Transaction, Budget
+from .models import Transaction, Budget, Category
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 
@@ -35,32 +35,52 @@ def home(request):
 
 def signup_user(request):
     if request.method == 'GET':
-        return render(request, 'finance/signupuser.html', {'form':UserCreationForm()})
+        return render(request, 'finance/signupuser.html', {'form': UserCreationForm()})
     else:
         if request.POST['password1'] == request.POST['password2']:
             try:
-                user = User.objects.create_user(request.POST['username'], password=request.POST['password1'])
-                user.save() 
+                user = User.objects.create_user(
+                    username=request.POST['username'], 
+                    password=request.POST['password1']
+                )
+                user.save()
                 login(request, user)
-                return redirect('current_finance')
-            except: IntegrityError
-            return render(request, 'finance/signupuser.html', {'form':UserCreationForm(), 'error':'Имя пользователя уже существует, пожалуйста задайте новое'})
+                return redirect('home')
+            except IntegrityError:
+                return render(request, 'finance/signup_user.html', {
+                    'form': UserCreationForm(), 
+                    'error': 'Имя пользователя уже существует, пожалуйста задайте новое'
+                })
         else:
-            return render(request, 'finance/signupuser.html', {'form':UserCreationForm(), 'error':'Пароли не совпадают'})
+            return render(request, 'finance/signup_user.html', {
+                'form': UserCreationForm(), 
+                'error': 'Пароли не совпадают'
+            })
 
 def login_user(request):
     if request.method == 'GET':
-        return render(request, 'finance/signupuser.html', {'form':AuthenticationForm()})
-    else:
-        user = authenticate(request, username=request.POST['username'], password=request.POST['password'])
+        return render(request, 'finance/loginuser.html', {'form': AuthenticationForm()})
+    else:   
+        user = authenticate(
+            request, 
+            username=request.POST['username'], 
+            password=request.POST['password']
+        )
+        
         if user is None:
-            return render(request, 'finance/signupuser.html', {'form':AuthenticationForm(), 'error':' Username And Password Did not match'})
+            return render(request, 'finance/login_user.html', {
+                'form': AuthenticationForm(), 
+                'error': 'Имя пользователя и пароль не совпадают'
+            })
         else:
-           login(request, user)
-           return redirect('current_finance')
+            login(request, user)
+            return redirect('home')
 
 def logout_user(request):
     if request.method == 'POST':
+        logout(request)
+        return redirect('home')
+    else:
         logout(request)
         return redirect('home')
 
@@ -87,15 +107,52 @@ def add_transaction(request):
     
 @login_required
 def all_transactions(request):
-    transactions = Transaction.objects.filter(user=request.user).order_by('-date')
-    search_query = request.GET.get('search_query', '' )
+    transactions = Transaction.objects.filter(user=request.user)
+    category_choices = Transaction.CATEGORY_CHOICES
+    transaction_type_choices = Transaction.TRANSACTION_TYPE
+    categories = Category.objects.all()
+
+    category_id = request.GET.get("category")
+    transaction_type = request.GET.get("transaction_type")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    min_amount = request.GET.get("min_amount")
+    max_amount = request.GET.get("max_amount")
+    search_query = request.GET.get("search_query", "")
+
+    if category_id:
+        transactions = transactions.filter(category_id=category_id)
+
+    if transaction_type:
+        transactions = transactions.filter(transaction_type=transaction_type)
+
+    if start_date:
+        transactions = transactions.filter(date__gte=start_date)
+
+    if end_date:
+        transactions = transactions.filter(date__lte=end_date)
+
+    if min_amount:
+        transactions = transactions.filter(amount__gte=min_amount)
+
+    if max_amount:
+        transactions = transactions.filter(amount__lte=max_amount)
 
     if search_query:
         transactions = transactions.filter(description__icontains=search_query)
 
-    return render(request, 'finance/transactions_list.html', {
-        'transactions': transactions,
-        'search_query': search_query 
+    return render(request, "finance/transactions_list.html", {
+        "transactions": transactions,
+        "categories": categories,
+        "selected_category": category_id,
+        "selected_type": transaction_type,
+        "selected_start_date": start_date,
+        "category_choices": category_choices,
+        "transaction_type_choices": transaction_type_choices,
+        "selected_end_date": end_date,
+        "selected_min_amount": min_amount,
+        "selected_max_amount": max_amount,
+        "search_query": search_query,
     })
 
 @login_required
