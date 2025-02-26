@@ -1,0 +1,32 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Редактирование транзакции{% endblock %}
+
+{% block content %}
+<div class="transactions-container">
+    <h1 class="page-title">Редактирование транзакции</h1>
+    
+    <form method="POST" class="form-container">
+        {% csrf_token %}
+        
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="field-error">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'all_transactions' %}" class="btn-secondary">Отмена</a>
+            <button type="submit" class="btn-primary">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

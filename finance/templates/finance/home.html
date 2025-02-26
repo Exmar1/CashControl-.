@@ -1,95 +1,171 @@
 {% extends "finance/base.html" %}
 
-{% block title %}
-    Главная - Управление финансами
-		<br>
-		Ваш Бюджет
+{% load static %}
+
+{% block title %}Главная - Управление финансами{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'finance/css/home.css' %}">
 {% endblock %}
 
-{% block header %}
-    Главная Страница по управлению финансами
-{% endblock header %}  
-
 {% block content %}
-<h2>Финансовое управление</h2>
-
-    <!-- Секция транзакций -->
-    <div class="transactions-section">
-        <button id="add-transaction-btn">
-            Добавить транзакцию
-        </button>
-        <div id="transaction-form-container" style="display: none;">
-            <form method="POST" action="{% url 'add_transaction' %}">
-                {% csrf_token %}
-                {{ form.as_p }} 
-                <button type="submit">
-                    Сохранить транзакцию
-                </button>
-            </form>
-        </div>
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1 class="main-title">Финансовый обзор</h1>
+        <div class="date-display">{% now "d.m.Y" %}</div>
     </div>
 
-    <!-- Секция бюджета -->
-    <div class = "budget-section">
-			<h3>Ваш Бюджет</h3>
-			{% if budget %}
-					<p>Текущий бюджет: <strong>{{ budget.amount }}  ₽</strong> (Категория: {{ budget.category }})</p>
-			{% else %}
-					<p>Бюджет пока не задан</p>
-			{% endif %}
-
-            <button id="toggle-budget-form">
-                {% if budget  %}Изменить{% else %}Добавить{% endif %} бюджет
+    <div class="card budget-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-pie"></i> Ваш бюджет</h2>
+            <button id="toggle-budget-form" class="btn btn-outline">
+                {% if budget %}Изменить{% else %}Добавить{% endif %}
+                <i class="fas fa-edit"></i>
             </button>
+        </div>
 
-            <div id="budget-form-container" style='display: none;'>
-                <form method='POST' action="{% url 'home' %}">
+        <div class="card-content">
+            {% if budget %}
+            <div class="budget-amount">
+                <span class="amount-value">{{ budget.amount }} ₽</span>
+                <span class="amount-category">{{ budget.category }}</span>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-wallet empty-icon"></i>
+                <p>Бюджет пока не задан</p>
+            </div>
+            {% endif %}
+
+            <div id="budget-form-container" class="form-container" style="display: none;">
+                <form method="POST" action="{% url 'home' %}" class="modern-form">
                     {% csrf_token %}
-                    {{ budget_form.as_p }}
-                    <button type="submit" name="save_budget">
-                        Сохранить
+                    <div class="form-group">
+                        {{ budget_form.amount.label_tag }}
+                        {{ budget_form.amount }}
+                    </div>
+                    <div class="form-group">
+                        {{ budget_form.category.label_tag }}
+                        {{ budget_form.category }}
+                    </div>
+                    <button type="submit" name="save_budget" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить
                     </button>
                 </form>
             </div>
         </div>
+    </div>
 
-		<!-- Список транзакций -->
-    <h3>Последние транзакции</h3>
-		<ul>
-				{% for transactions in transaction  %}
-					<li>{{ transactions.date }}: {{ transactions.amount }} ₽ - {{ transactions.category }}</li>
-				{% empty %}
-				<li>Нет транзакций</li>
-				{% endfor %}
-		</ul>
+    <div class="card transactions-card">
+        <div class="card-header">
+            <h2><i class="fas fa-exchange-alt"></i> Транзакции</h2>
+            <button id="add-transaction-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добавить
+            </button>
+        </div>
 
-<a href="{% url 'completed_finance' %}">Мои транзакции</a>
+        <div id="transaction-form-container" class="form-container" style="display: none;">
+            <form method="POST" action="{% url 'home' %}" class="modern-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.date.label_tag }}
+                        {{ form.date }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.amount.label_tag }}
+                        {{ form.amount }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.category.label_tag }}
+                        {{ form.category }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.transaction_type.label_tag }}
+                        {{ form.transaction_type }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                </div>
+                <div class="form-actions">
+                    <button type="submit" name="save_transaction" class="btn btn-success">
+                        <i class="fas fa-check"></i> Сохранить транзакцию
+                    </button>
+                </div>
+            </form>
+        </div>
 
-{% endblock content %}
+        <div class="card-content">
+            <h3>Последние транзакции</h3>
+            {% if transaction %}
+            <ul class="transactions-list">
+                {% for transactions in transaction %}
+                <li class="transaction-item {% if transactions.transaction_type == 'expense' %}expense{% else %}income{% endif %}">
+                    <div class="transaction-date">{{ transactions.date|date:"d.m.Y" }}</div>
+                    <div class="transaction-category">
+                        <i class="fas fa-tag"></i> {{ transactions.category }}
+                    </div>
+                    <div class="transaction-amount">
+                        {% if transactions.transaction_type == 'expense' %}-{% else %}+{% endif %}
+                        {{ transactions.amount }} ₽
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="view-all">
+                <a href="{% url 'completed_finance' %}" class="btn btn-text">
+                    Все транзакции <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-receipt empty-icon"></i>
+                <p>У вас пока нет транзакций</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-{% block scripts %}
-    <!-- Скрипт для отображения формы транзакций -->
-    <script>
-        document.getElementById("add-transaction-btn").addEventListener("click", function() {
-            document.getElementById("transaction-form-container").style.display = "block";
-        });
-    </script>
-
-    <!-- Скрипт для отображения формы бюджета -->
-    <script>
-        document.getElementById("add-budget-btn").addEventListener("click", function() {
-            document.getElementById("budget-form-container").style.display = "block";
-        });
-    </script>
-
-    <script>
-        document.getElementById("toggle-budget-form").addEventListener("click", function() {
-            var formContainer = document.getElementById("budget-form-container");
-            if (formContainer.style.display === "none") {
-                formContainer.style.display = "block";
-            } else {
+{% block extra_js %}
+<script>
+    document.getElementById("add-transaction-btn").addEventListener("click", function() {
+        const formContainer = document.getElementById("transaction-form-container");
+        if (formContainer.style.display === "none" || formContainer.style.display === "") {
+            formContainer.style.display = "block";
+            formContainer.classList.add("form-slide-down");
+        } else {
+            formContainer.classList.remove("form-slide-down");
+            formContainer.classList.add("form-slide-up");
+            setTimeout(() => {
                 formContainer.style.display = "none";
-            }
-        });
-    </script>
-{% endblock scripts %}
+                formContainer.classList.remove("form-slide-up");
+            }, 300);
+        }
+    });
+    
+    document.querySelector('form.modern-form').addEventListener('submit', function(e) {
+        e.stopPropagation();
+    });
+
+    document.getElementById("toggle-budget-form").addEventListener("click", function() {
+        const formContainer = document.getElementById("budget-form-container");
+        if (formContainer.style.display === "none" || formContainer.style.display === "") {
+            formContainer.style.display = "block";
+            formContainer.classList.add("form-slide-down");
+        } else {
+            formContainer.classList.remove("form-slide-down");
+            formContainer.classList.add("form-slide-up");
+            setTimeout(() => {
+                formContainer.style.display = "none";
+                formContainer.classList.remove("form-slide-up");
+            }, 300);
+        }
+    });
+</script>
+{% endblock %}

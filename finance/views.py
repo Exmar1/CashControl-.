@@ -11,22 +11,34 @@ from django.shortcuts import get_object_or_404
 
 @login_required
 def home(request):
-     if request.method == 'POST' and 'save_budget' in request.POST:
-         budget = Budget.objects.filter(user=request.user).first()
-         budget_form = BudgetForm(request.POST, instance=budget)
-         if budget_form.is_valid():
-             new_budget = budget_form.save(commit=False)
-             new_budget.user = request.user
-             new_budget.save()
-             return redirect('home')
-     else:
-         form = TransactionForm()
-         budget = Budget.objects.filter(user=request.user).first()
-         budget_form = BudgetForm(instance=budget)
+    if request.method == 'POST':
+        if 'save_budget' in request.POST:
+            budget = Budget.objects.filter(user=request.user).first()
+            budget_form = BudgetForm(request.POST, instance=budget)
+            if budget_form.is_valid():
+                new_budget = budget_form.save(commit=False)
+                new_budget.user = request.user
+                new_budget.save()
+                messages.success(request, 'Бюджет успешно сохранен')
+                return redirect('home')
+        elif 'save_transaction' in request.POST:
+            form = TransactionForm(request.POST)
+            if form.is_valid():
+                transaction = form.save(commit=False)
+                transaction.user = request.user
+                transaction.save()
+                messages.success(request, 'Транзакция успешно сохранена')
+                return redirect('home')
+            else:
+                messages.error(request, 'Ошибка при сохранении транзакции. Проверьте введенные данные.')
+    else:
+        form = TransactionForm()
+        budget = Budget.objects.filter(user=request.user).first()
+        budget_form = BudgetForm(instance=budget)
 
-     transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+    transactions = Transaction.objects.filter(user=request.user).order_by('-date')
 
-     return render(request, 'finance/home.html', {
+    return render(request, 'finance/home.html', {
         "form": form,
         "budget_form": budget_form,
         "transaction": transactions,
@@ -121,7 +133,7 @@ def all_transactions(request):
     search_query = request.GET.get("search_query", "")
 
     if category_id:
-        transactions = transactions.filter(category_id=category_id)
+        transactions = transactions.filter(category=category_id)
 
     if transaction_type:
         transactions = transactions.filter(transaction_type=transaction_type)
@@ -189,6 +201,24 @@ def add_budget(request):
         "budget_form":budget_form,
         "transaction": transaction,
         "budgets":budgets
+    })
+
+@login_required
+def edit_transaction(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Транзакция успешно обновлена')
+            return redirect('all_transactions')
+    else:
+        form = TransactionForm(instance=transaction)
+    
+    return render(request, 'finance/edit_transaction.html', {
+        'form': form,
+        'transaction': transaction
     })
 
 

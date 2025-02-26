@@ -23,17 +23,23 @@
                 <nav class="nav">
                     <ul class="nav__list">
                         {% if user.is_authenticated %}
-                            <li class="nav__item"><a href="{% url 'home' %}">Главная</a></li>
-                            <li class="nav__item"><a href="{% url 'all_transactions' %}">Транзакции</a></li>
+                            <li class="nav__item"><a href="{% url 'home' %}" class="nav__link"><i class="fas fa-home"></i> Главная</a></li>
+                            <li class="nav__item"><a href="{% url 'all_transactions' %}" class="nav__link"><i class="fas fa-list"></i> Транзакции</a></li>
                             <li class="nav__item">
-                                <a href="{% url 'logoutuser' %}" class="btn-logout">Выйти</a>
+                                <form action="{% url 'logoutuser' %}" method="POST" class="logout-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+                                </form>
                             </li>
                         {% else %}
-                            <li class="nav__item"><a href="{% url 'loginuser' %}" class="nav__link">Вход</a></li>
-                            <li class="nav__item"><a href="{% url 'signupuser' %}" class="nav__link btn-primary">Регистрация</a></li>
+                            <li class="nav__item"><a href="{% url 'loginuser' %}" class="nav__link"><i class="fas fa-sign-in-alt"></i> Вход</a></li>
+                            <li class="nav__item"><a href="{% url 'signupuser' %}" class="nav__link btn-primary"><i class="fas fa-user-plus"></i> Регистрация</a></li>
                         {% endif %}
                     </ul>
                 </nav>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </header>
 
@@ -52,5 +58,13 @@
 
     <script src="{% static 'finance/js/script.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    <script>
+
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            const nav = document.querySelector('.nav');
+            nav.classList.toggle('nav--open');
+            this.classList.toggle('mobile-menu-toggle--active');
+        });
+    </script>
 </body>
 </html>
